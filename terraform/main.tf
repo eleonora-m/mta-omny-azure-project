@@ -62,7 +62,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "mta_vmss" {
   instances           = 2
   
   # Automatically spreads VMs across multiple data centers
-  zones = ["1", "2", "3"] 
 
   admin_username                  = "azureuser"
   disable_password_authentication = true
