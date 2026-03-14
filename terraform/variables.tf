@@ -1,14 +1,17 @@
 variable "resource_group_name" {
   description = "Name of the resource group"
-  default     = "rg-mta-omny-prod-v5" # Ставим v5 для чистого старта
+  type        = string
+  default     = "rg-mta-omny-prod-v5"
 }
 
 variable "location" {
-  description = "Azure region for resources"
-  default     = "eastus" # Match existing resource group location
+  description = "Azure region to deploy resources"
+  type        = string
+  default     = "eastus" 
 }
 
 variable "project_name" {
-  description = "Project prefix for resources"
+  description = "Prefix for all resources"
+  type        = string
   default     = "omny-fare-system"
 }

@@ -1,15 +1,15 @@
-# 1. Create a Resource Group
+# 1. Resource Group
 resource "azurerm_resource_group" "mta_rg" {
   name     = var.resource_group_name
   location = var.location
-  
+
   tags = {
     Environment = "Production"
     Project     = "MTA-OMNY-Scalability"
   }
 }
 
-# 2. Create a Virtual Network (VNet)
+# 2. Virtual Network
 resource "azurerm_virtual_network" "mta_vnet" {
   name                = "${var.project_name}-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -17,7 +17,7 @@ resource "azurerm_virtual_network" "mta_vnet" {
   resource_group_name = azurerm_resource_group.mta_rg.name
 }
 
-# 3. Create a Subnet
+# 3. Subnet
 resource "azurerm_subnet" "mta_subnet" {
   name                 = "internal-subnet"
   resource_group_name  = azurerm_resource_group.mta_rg.name
@@ -25,16 +25,16 @@ resource "azurerm_subnet" "mta_subnet" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-# 4. Create a Public IP (Standard SKU to fix the Azure Free Tier limit)
+# 4. Public IP (Standard SKU)
 resource "azurerm_public_ip" "mta_public_ip" {
   name                = "${var.project_name}-pip"
   location            = azurerm_resource_group.mta_rg.location
   resource_group_name = azurerm_resource_group.mta_rg.name
   allocation_method   = "Static"
-  sku                 = "Standard" # <-- ИМЕННО ЭТО ИСПРАВЛЯЕТ ПЕРВУЮ ОШИБКУ
+  sku                 = "Standard"
 }
 
-# 5. Create a Load Balancer (Standard SKU required by Standard IP)
+# 5. Load Balancer
 resource "azurerm_lb" "mta_lb" {
   name                = "${var.project_name}-lb"
   location            = azurerm_resource_group.mta_rg.location
@@ -47,19 +47,22 @@ resource "azurerm_lb" "mta_lb" {
   }
 }
 
-# 6. Create a Backend Address Pool for the Load Balancer
+# 6. Backend Pool
 resource "azurerm_lb_backend_address_pool" "mta_bepool" {
   loadbalancer_id = azurerm_lb.mta_lb.id
   name            = "BackEndAddressPool"
 }
 
-# 7. Create the Virtual Machine Scale Set (The auto-scaling servers)
+# 7. Virtual Machine Scale Set
 resource "azurerm_linux_virtual_machine_scale_set" "mta_vmss" {
   name                = "${var.project_name}-vmss"
   resource_group_name = azurerm_resource_group.mta_rg.name
   location            = azurerm_resource_group.mta_rg.location
-  sku                 = "Standard_A1_v2"
-  instances           = 1
+  sku                 = "Standard_B1s" # Changed to B1s for better availability
+  instances           = 2
+  
+  # Automatically spreads VMs across multiple data centers
+  zones = ["1", "2", "3"] 
 
   admin_username                  = "azureuser"
   disable_password_authentication = true
