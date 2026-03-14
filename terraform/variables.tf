@@ -1,6 +1,6 @@
 variable "resource_group_name" {
   description = "Name of the resource group"
-  default     = "rg-mta-omny-prod"
+  default     = "rg-mta-omny-prod-v3"
 }
 
 variable "location" {
