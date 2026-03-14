@@ -1,0 +1,25 @@
+---
+- name: Configure MTA OMNY Payment Servers
+  hosts: all
+  become: true # Execute commands with root privileges
+  
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Run Payment API Simulator (Nginx container)
+      # Deploy Nginx container on port 80 to simulate the payment gateway
+      shell: docker run -d -p 80:80 --name omny-api --restart always nginx
+      ignore_errors: true # Prevent failure if the container is already running

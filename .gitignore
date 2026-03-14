@@ -1,0 +1,33 @@
+# ----------------------------------------------------------------------
+# DevOps Secure .gitignore for Terraform and Azure
+# ----------------------------------------------------------------------
+
+# 1. Local .terraform directories and plugins (Heavy files)
+**/.terraform/*
+.terraform/
+
+# 2. Terraform State files (CRITICAL SECURITY: Contains plain-text infrastructure data)
+**/*.tfstate
+**/*.tfstate.*
+**/crash.log
+**/crash.*.log
+
+# 3. Variables and Secrets files (CRITICAL SECURITY: Contains passwords/keys)
+**/*.tfvars
+**/*.tfvars.json
+**/.env
+
+# 4. SSH Keys (Just in case they are generated locally)
+**/*.pem
+**/*.key
+**/id_rsa
+**/id_rsa.pub
+
+# 5. Override files
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+
+# Allow the lock file (This is safe and recommended to track)
+!.terraform.lock.hcl
