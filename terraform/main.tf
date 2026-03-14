@@ -25,19 +25,21 @@ resource "azurerm_subnet" "mta_subnet" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-# 4. Create a Public IP
+# 4. Create a Public IP (Standard SKU to fix the Azure Free Tier limit)
 resource "azurerm_public_ip" "mta_public_ip" {
   name                = "${var.project_name}-pip"
   location            = azurerm_resource_group.mta_rg.location
   resource_group_name = azurerm_resource_group.mta_rg.name
   allocation_method   = "Static"
+  sku                 = "Standard" # <-- ИМЕННО ЭТО ИСПРАВЛЯЕТ ПЕРВУЮ ОШИБКУ
 }
 
-# 5. Create a Load Balancer
+# 5. Create a Load Balancer (Standard SKU required by Standard IP)
 resource "azurerm_lb" "mta_lb" {
   name                = "${var.project_name}-lb"
   location            = azurerm_resource_group.mta_rg.location
   resource_group_name = azurerm_resource_group.mta_rg.name
+  sku                 = "Standard"
 
   frontend_ip_configuration {
     name                 = "PublicIPAddress"
@@ -45,7 +47,13 @@ resource "azurerm_lb" "mta_lb" {
   }
 }
 
-# 6. Create the Virtual Machine Scale Set (SECURE VERSION)
+# 6. Create a Backend Address Pool for the Load Balancer
+resource "azurerm_lb_backend_address_pool" "mta_bepool" {
+  loadbalancer_id = azurerm_lb.mta_lb.id
+  name            = "BackEndAddressPool"
+}
+
+# 7. Create the Virtual Machine Scale Set (The auto-scaling servers)
 resource "azurerm_linux_virtual_machine_scale_set" "mta_vmss" {
   name                = "${var.project_name}-vmss"
   resource_group_name = azurerm_resource_group.mta_rg.name
@@ -78,9 +86,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "mta_vmss" {
     primary = true
 
     ip_configuration {
-      name      = "internal"
-      primary   = true
-      subnet_id = azurerm_subnet.mta_subnet.id
+      name                                   = "internal"
+      primary                                = true
+      subnet_id                              = azurerm_subnet.mta_subnet.id
+      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.mta_bepool.id]
     }
   }
 }
