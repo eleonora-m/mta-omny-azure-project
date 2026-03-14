@@ -5,7 +5,7 @@ variable "resource_group_name" {
 
 variable "location" {
   description = "Azure region for resources"
-  default     = "westus" # Регион с лучшей доступностью для бесплатного аккаунта
+  default     = "eastus" # Match existing resource group location
 }
 
 variable "project_name" {
