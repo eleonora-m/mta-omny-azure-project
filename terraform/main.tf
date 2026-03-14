@@ -58,7 +58,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "mta_vmss" {
   name                = "${var.project_name}-vmss"
   resource_group_name = azurerm_resource_group.mta_rg.name
   location            = azurerm_resource_group.mta_rg.location
-  sku                 = "Standard_B1s"
+  sku                 = "Standard_B2s_v2"
   instances           = 2
 
   admin_username                  = "azureuser"

@@ -5,7 +5,7 @@ variable "resource_group_name" {
 
 variable "location" {
   description = "Azure region for resources"
-  default     = "Central US" # Переезжаем туда, где есть свободные бесплатные серверы
+  default     = "canadacentral" # Переезжаем туда, где есть свободные бесплатные серверы
 }
 
 variable "project_name" {
