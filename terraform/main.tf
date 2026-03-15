@@ -1,4 +1,4 @@
-# 1. Resource Group
+# Resource Group
 resource "azurerm_resource_group" "mta_rg" {
   name     = var.resource_group_name
   location = var.location
@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "mta_rg" {
   }
 }
 
-# 2. Virtual Network
+# Virtual Network
 resource "azurerm_virtual_network" "mta_vnet" {
   name                = "${var.project_name}-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -17,7 +17,7 @@ resource "azurerm_virtual_network" "mta_vnet" {
   resource_group_name = azurerm_resource_group.mta_rg.name
 }
 
-# 3. Subnet
+# Subnet
 resource "azurerm_subnet" "mta_subnet" {
   name                 = "internal-subnet"
   resource_group_name  = azurerm_resource_group.mta_rg.name
@@ -25,7 +25,7 @@ resource "azurerm_subnet" "mta_subnet" {
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-# 4. Public IP (Standard SKU)
+# Public IP
 resource "azurerm_public_ip" "mta_public_ip" {
   name                = "${var.project_name}-pip"
   location            = azurerm_resource_group.mta_rg.location
@@ -34,7 +34,7 @@ resource "azurerm_public_ip" "mta_public_ip" {
   sku                 = "Standard"
 }
 
-# 5. Load Balancer
+# Load Balancer
 resource "azurerm_lb" "mta_lb" {
   name                = "${var.project_name}-lb"
   location            = azurerm_resource_group.mta_rg.location
@@ -47,21 +47,29 @@ resource "azurerm_lb" "mta_lb" {
   }
 }
 
-# 6. Backend Pool
+# Backend Pool
 resource "azurerm_lb_backend_address_pool" "mta_bepool" {
   loadbalancer_id = azurerm_lb.mta_lb.id
   name            = "BackEndAddressPool"
 }
 
-# 7. Virtual Machine Scale Set
+# Health Probe
+resource "azurerm_lb_probe" "mta_probe" {
+  name            = "tcp-probe"
+  loadbalancer_id = azurerm_lb.mta_lb.id
+  protocol        = "Tcp"
+  port            = 22
+}
+
+# VM Scale Set
 resource "azurerm_linux_virtual_machine_scale_set" "mta_vmss" {
+
   name                = "${var.project_name}-vmss"
   resource_group_name = azurerm_resource_group.mta_rg.name
   location            = azurerm_resource_group.mta_rg.location
-  sku                 = "Standard_B1s" # Changed to B1s for better availability
-  instances           = 2
-  
-  # Automatically spreads VMs across multiple data centers
+
+  sku       = "Standard_D2s_v3"
+  instances = 1
 
   admin_username                  = "azureuser"
   disable_password_authentication = true
